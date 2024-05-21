@@ -59,4 +59,20 @@ public class MealController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
+    [HttpDelete("id")]
+    public async Task<ActionResult<bool>> DeleteMeal(Guid id)
+    {
+        try
+        {
+            bool isDeleted = await _mediator.Send(new DeleteMealCommand(id));
+
+            return Ok(isDeleted);
+        }
+        catch (Exception ex)
+        {
+
+            return BadRequest(ex);
+        }
+    }
 }

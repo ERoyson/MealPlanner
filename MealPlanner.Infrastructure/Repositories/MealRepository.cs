@@ -31,9 +31,29 @@ internal class MealRepository : IMealRepository
         }
     }
 
-    public Task<bool> Delete(Guid id, CancellationToken cancellation)
+    public async Task Delete(Guid id, CancellationToken cancellation)
     {
-        throw new NotImplementedException();
+        try
+        {
+            MMeal? mMeal = await _context.Meals
+            .Include(m => m.Recipe)
+            .ThenInclude(r => r.Ingredients)
+            .FirstOrDefaultAsync(m => m.Id == id, cancellation);
+
+            if(mMeal is null)
+            {
+                throw new Exception("Meal not found");
+            }
+
+            _context.Ingredients.RemoveRange(mMeal.Recipe.Ingredients);
+            _context.Recipes.Remove(mMeal.Recipe);
+            _context.Meals.Remove(mMeal);
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
     }
 
     public async Task<Meal> GetById(Guid id, CancellationToken cancellation)
