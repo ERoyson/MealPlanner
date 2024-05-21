@@ -1,11 +1,5 @@
 ﻿using MealPlanner.Domain.Abstractions;
 using MealPlanner.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MealPlanner.Infrastructure.Repositories
 {
@@ -19,7 +13,6 @@ namespace MealPlanner.Infrastructure.Repositories
             _context = context;
             Meal = new MealRepository(_context);
         }
-
 
         public void Clear()
         {

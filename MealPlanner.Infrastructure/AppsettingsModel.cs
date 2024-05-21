@@ -1,7 +1,6 @@
-﻿namespace MealPlanner.Infrastructure
+﻿namespace MealPlanner.Infrastructure;
+
+public class AppsettingsModel
 {
-    public class AppsettingsModel
-    {
-        public string MySqlConnectionString { get; set; }
-    }
+    public string MySqlConnectionString { get; set; }
 }

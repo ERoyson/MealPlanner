@@ -5,45 +5,47 @@ using MealPlanner.Infrastructure.Data;
 using MealPlanner.Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace MealPlanner.Infrastructure.Repositories
+namespace MealPlanner.Infrastructure.Repositories;
+
+internal class MealRepository : IMealRepository
 {
-    internal class MealRepository : IMealRepository
+    private readonly MealPlannerDbContext _context;
+    public MealRepository(MealPlannerDbContext context)
     {
-        private readonly MealPlannerDbContext _context;
-        public MealRepository(MealPlannerDbContext context)
+        _context = context;
+    }
+    public async Task<Guid> Add(Meal meal, CancellationToken cancellation)
+    {
+        try
         {
-            _context = context;
+            MMeal mMeal = meal.Adapt<MMeal>();
+
+            var id = await _context.Meals.AddAsync(mMeal, cancellation);
+
+            return mMeal.Id;
         }
-        public async Task<Guid> Add(Meal meal, CancellationToken cancellation)
+        catch (Exception ex)
         {
-            try
-            {
-                MMeal mMeal = meal.Adapt<MMeal>();
-
-                var id = await _context.Meals.AddAsync(mMeal);
-
-                return mMeal.Id;
-            }
-            catch (Exception ex)
-            {
-                // throw exception
-                throw;
-            }
+            // throw exception
+            throw;
         }
+    }
 
-        public Task<bool> Delete(Guid id, CancellationToken cancellation)
-        {
-            throw new NotImplementedException();
-        }
+    public Task<bool> Delete(Guid id, CancellationToken cancellation)
+    {
+        throw new NotImplementedException();
+    }
 
-        public async Task<Meal> GetById(Guid id, CancellationToken cancellation)
+    public async Task<Meal> GetById(Guid id, CancellationToken cancellation)
+    {
+        try
         {
             MMeal? mMeal = await _context.Meals
-                .Include(m => m.Recipe)
-                .ThenInclude(r => r.Ingredients)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            .Include(m => m.Recipe)
+            .ThenInclude(r => r.Ingredients)
+            .FirstOrDefaultAsync(m => m.Id == id, cancellation);
 
-            if(mMeal is null)
+            if (mMeal is null)
             {
                 throw new ArgumentNullException(nameof(MMeal));
             }
@@ -62,10 +64,37 @@ namespace MealPlanner.Infrastructure.Repositories
 
             return meal;
         }
-
-        public Task<Meal> Update(Meal meal, CancellationToken cancellation)
+        catch (Exception ex)
         {
-            throw new NotImplementedException();
+
+            throw;
+        }
+    }
+
+    public async Task Update(Meal meal, CancellationToken cancellation)
+    {
+        try
+        {
+            var oldMeal = await _context.Meals
+            .Include(m => m.Recipe)
+            .ThenInclude(r => r.Ingredients).AsNoTracking()
+            .SingleOrDefaultAsync(m => m.Id == meal.Id, cancellation);
+
+            if (oldMeal is null)
+            {
+                throw new Exception("Meal not found");
+            }
+
+            MMeal newMeal = meal.Adapt<MMeal>();
+
+            newMeal = newMeal.Adapt(oldMeal);
+
+            _context.Meals.Update(newMeal);
+        }
+        catch (Exception ex)
+        {
+
+            throw;
         }
     }
 }
