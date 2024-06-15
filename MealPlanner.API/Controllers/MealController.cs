@@ -16,6 +16,20 @@ public class MealController : ControllerBase
         _mediator = mediator;
     }
 
+    [HttpGet("getallmeals")]
+    public async Task<ActionResult<List<MealDTO>>> GetAllMeals()
+    {
+        try
+        {
+            List<MealDTO> meals = await _mediator.Send(new GetAllMealsQuery());
+            return Ok(meals);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [HttpPost]
     public async Task<ActionResult<Guid>> Add(MealDTO mealDTO)
     {

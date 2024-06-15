@@ -12,8 +12,10 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        var connectionString = configuration.GetConnectionString("MySqlConnectionString");
+
         services.AddDbContext<MealPlannerDbContext>(options =>
-            options.UseMySQL(configuration.GetConnectionString("MySqlConnectionString")));
+            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 

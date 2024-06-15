@@ -14,6 +14,24 @@ internal class MealRepository : IMealRepository
     {
         _context = context;
     }
+    public async Task<List<Meal>> GetAll(CancellationToken cancellation)
+    {
+        try
+        {
+            List<MMeal> mMeals = await _context.Meals
+                .Include(m => m.Recipe).ThenInclude(r => r.Ingredients)
+                .ToListAsync(cancellation);
+
+            List<Meal> meals = mMeals.Adapt<List<Meal>>();
+
+            return meals;
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
+    }
     public async Task<Guid> Add(Meal meal, CancellationToken cancellation)
     {
         try
@@ -70,17 +88,20 @@ internal class MealRepository : IMealRepository
                 throw new ArgumentNullException(nameof(MMeal));
             }
 
-            List<Ingredient> ingredients = new();
+            Meal meal = mMeal.Adapt<Meal>();
 
-            // Mapping Model to Domain Entity.
-            foreach (MIngredient mIngredient in mMeal.Recipe.Ingredients)
-            {
-                var ingredient = mIngredient.Adapt<Ingredient>();
-                ingredients.Add(ingredient);
-            }
-            Recipe recipe = Recipe.Create(mMeal.Recipe.Id, ingredients);
+            // code below can be removed if the GetById works without any missing data.
+            //List<Ingredient> ingredients = new();
 
-            Meal meal = Meal.Create(mMeal.Id, mMeal.MealName, mMeal.MealDescription, recipe);
+            //// Mapping Model to Domain Entity.
+            //foreach (MIngredient mIngredient in mMeal.Recipe.Ingredients)
+            //{
+            //    var ingredient = mIngredient.Adapt<Ingredient>();
+            //    ingredients.Add(ingredient);
+            //}
+            //Recipe recipe = Recipe.Create(mMeal.Recipe.Id, ingredients);
+
+            //Meal meal = Meal.Create(mMeal.Id, mMeal.MealName, mMeal.MealDescription, recipe);
 
             return meal;
         }

@@ -15,8 +15,10 @@ namespace MealPlanner.Infrastructure.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseMySQL(_config.Value.MySqlConnectionString);
-            //optionsBuilder.UseMySQL("connectionstring");
+            optionsBuilder.UseMySql(
+                _config.Value.MySqlConnectionString,
+                ServerVersion.AutoDetect(_config.Value.MySqlConnectionString)
+            );
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
